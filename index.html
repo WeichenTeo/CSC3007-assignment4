@@ -22,7 +22,7 @@
 
 <script>
 
-let width = 800, height = 300;
+let width = 800, height = 400;
 
 let svg = d3.select("svg")
     .attr("viewBox", "0 0 " + width + " " + height)
@@ -36,6 +36,10 @@ let vacCScale = d3
           .scaleOrdinal()
           .domain(["no", "partial (1 dose)","yes (2 doses)"])
           .range(["#fc6d68", "#F4BB44", "#90bf17"]);
+let infectScale = d3
+          .scaleOrdinal()
+          .domain(["infector", "infectee", "notInfector"])
+          .range(["red", "#FF00FF", "black"]);
 
 // Arrow SVG
 svg
@@ -109,16 +113,26 @@ let node = svg.append("g")
         .style("visibility","visible");
 
     d3.select(event.currentTarget)
-        .style('stroke',"black")
+        .style('stroke',infectScale("notInfector"))
         .style('stroke-width',"1.5px");
+    data[0].forEach(function (item){
+        if(item.infector === d.id){
+            d3.select(event.currentTarget)
+                .style('stroke',infectScale("infector"))
+                .style('stroke-width',"1.5px");
+            
+            d3.select("#id"+item.infectee)
+                .style('stroke',infectScale("infectee"))
+                .style('stroke-width',"2px");
+        }
+    })
 
 })
 .on("mouseout", (event, d) => {
     d3.select(".tooltip")
     .style("visibility","hidden");
 
-    d3.select(event.currentTarget)
-        .style('stroke',"none");
+    node.style('stroke',"none");
 });
 
 
@@ -145,10 +159,10 @@ let simulation = d3.forceSimulation()
                 .style("visibility","visible");
 
             d3.select("#id"+d.source.id)
-                .style('stroke',"red")
+                .style('stroke',infectScale("infector"))
                 .style('stroke-width',"2px");
             d3.select("#id"+d.target.id)
-                .style('stroke',"black")
+                .style('stroke',infectScale("infectee"))
                 .style('stroke-width',"2px");
 
         })
